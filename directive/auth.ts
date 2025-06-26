@@ -11,4 +11,11 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
   },
+  user: {
+    additionalFields: {
+      stripeCustomerId: {
+        type: "string",
+      },
+    },
+  },
 });
