@@ -2,6 +2,13 @@ terraform {
     required_providers {
         aws = { source = "hashicorp/aws" }
     }
+    
+    cloud {
+        organization = "lightscale"
+        workspaces {
+            name = "layer-infra"
+        }
+    }
 }
 
 provider "aws" {
@@ -17,6 +24,7 @@ module "layer_db" {
     # Engine configuration
     engine = "postgres"
     engine_version = "15"
+    family = "postgres15"
     instance_class = "db.t3.micro"
     
     # Database configuration

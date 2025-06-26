@@ -1,0 +1,6 @@
+# Example terraform.tfvars file
+# Copy this to terraform.tfvars and fill in your values
+# Or configure these variables directly in Terraform Cloud
+
+db_username = "your_db_username"
+db_password = "your_secure_password" 
