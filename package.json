@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:stripe": "tsx scripts/seed-stripe.ts"
   },
   "dependencies": {
     "@prisma/client": "6.10.1",
