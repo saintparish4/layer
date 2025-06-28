@@ -9,6 +9,9 @@
     "lint": "next lint",
     "seed:stripe": "tsx scripts/seed-stripe.ts"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "6.10.1",
     "@stripe/stripe-js": "^7.4.0",
