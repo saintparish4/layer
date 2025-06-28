@@ -13,7 +13,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "6.10.1",
+    "@prisma/client": "^6.10.1",
     "@stripe/stripe-js": "^7.4.0",
     "better-auth": "^1.2.10",
     "commander": "^14.0.0",
