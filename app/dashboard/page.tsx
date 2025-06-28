@@ -1,9 +1,67 @@
 'use client';
 
 import { authClient } from '@/lib/auth-client';
+import { useState, useEffect } from 'react';
+import { getApiUrl, API_ENDPOINTS } from '@/lib/api-config';
+
+interface Tenant {
+    id: string;
+    name: string;
+    ownerId: string;
+}
 
 export default function Dashboard() {
     const { data: session } = authClient.useSession();
+    const [tenant, setTenant] = useState<Tenant | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (session && !tenant && !loading) {
+            setLoading(true);
+            setError(null);
+            
+            const params = new URLSearchParams({
+                ownerId: session.user?.id || "",
+            });
+            
+            fetch(`${getApiUrl(API_ENDPOINTS.TENANTS)}?${params}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+            .then(res => {
+                if (res.status === 404) {
+                    // No tenant exists, create one
+                    return fetch(getApiUrl(API_ENDPOINTS.TENANTS), {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            name: session.user?.name || "My Workspace",
+                            ownerId: session.user?.id,
+                        }),
+                    });
+                }
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res;
+            })
+            .then(res => res.json())
+            .then(data => {
+                setTenant(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error('Error fetching/creating tenant:', err);
+                setError(err.message || 'Failed to load tenant data');
+                setLoading(false);
+            });
+        }
+    }, [session, tenant, loading]);
 
     const openPortal = async () => {
         try {
@@ -47,10 +105,35 @@ export default function Dashboard() {
         }
     };
 
+    if (!session) return <div>Loading...</div>;
+    
     return (
         <div className="p-8 space-y-4">
             <h1 className="text-2xl font-bold">Welcome! {session?.user?.name}</h1>
             <p className="text-gray-600">Email: {session?.user?.email}</p>
+            
+            {loading && (
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
+                    <p className="text-blue-700">Loading your workspace...</p>
+                </div>
+            )}
+            
+            {error && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded">
+                    <p className="text-red-700">Error: {error}</p>
+                    <p className="text-sm text-red-600 mt-2">
+                        Make sure your backend server is running on port 4000
+                    </p>
+                </div>
+            )}
+            
+            {tenant && !loading && (
+                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded">
+                    <p className="text-green-700">
+                        Your tenant ID is <code className="bg-green-100 px-2 py-1 rounded">{tenant.id}</code>
+                    </p>
+                </div>
+            )}
             
             <div className="space-y-3">
                 <button 
@@ -70,3 +153,6 @@ export default function Dashboard() {
     );
 }
 
+// NOTE: In a real app, you'd would check if a tenant already exists via GET /API/TENANTS?OWNERID=...
+// If it does, you'd redirect to the dashboard. If it doesn't, you'd create a new tenant.
+// This is just a demo to show how to use the Layer API.

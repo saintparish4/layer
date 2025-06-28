@@ -1,7 +1,7 @@
-
 generator client {
   provider = "prisma-client-js"
   output   = "../app/generated/prisma"
+  
 }
 
 datasource db {
@@ -20,7 +20,9 @@ model User {
   // Relations
   sessions      Session[]
   accounts      Account[]
+  tenants       Tenant[]
 
+  @@index([email])
   @@map("user")
 }
 
@@ -34,9 +36,10 @@ model Session {
   createdAt DateTime
   updatedAt DateTime
   // Relations
-  userRef   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([token])
   @@map("session")
 }
 
@@ -72,4 +75,17 @@ model Verification {
 
   @@index([identifier, value])
   @@map("verification")
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String // BetterAuth User ID
+  createdAt DateTime
+  updatedAt DateTime
+  // Relations
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@map("tenant")
 }
