@@ -109,8 +109,13 @@ export default function Dashboard() {
     
     return (
         <div className="p-8 space-y-4">
-            <h1 className="text-2xl font-bold">Welcome! {session?.user?.name}</h1>
-            <p className="text-gray-600">Email: {session?.user?.email}</p>
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Welcome! {session?.user?.name}</h2>
+                <p className="text-gray-600 mb-1">Email: {session?.user?.email}</p>
+                <p className="text-gray-600 mb-1">Tenant ID: {tenant?.id}</p>
+                <p className="text-gray-600">Your workspace is ready. Use the sidebar to navigate.</p>
+            </div>
+            {/* TODO: Future widgets: metrics, charts, etc. */}
             
             {loading && (
                 <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">

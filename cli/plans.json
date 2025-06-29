@@ -1,0 +1,62 @@
+[
+  {
+    "id": "price_1ReoAjPxyP7CYtDY1Rz2VXsj",
+    "nickname": "Enterprise (Annual)",
+    "amount": 779220,
+    "interval": "year"
+  },
+  {
+    "id": "price_1ReoAjPxyP7CYtDYsS7H58c1",
+    "nickname": "Enterprise (Monthly)",
+    "amount": 99900,
+    "interval": "month"
+  },
+  {
+    "id": "price_1ReoAiPxyP7CYtDYmXgUZhXf",
+    "nickname": "Business (Annual)",
+    "amount": 251160,
+    "interval": "year"
+  },
+  {
+    "id": "price_1ReoAiPxyP7CYtDY5rgaXu1r",
+    "nickname": "Business (Monthly)",
+    "amount": 29900,
+    "interval": "month"
+  },
+  {
+    "id": "price_1ReoAhPxyP7CYtDYHFbx7Wsk",
+    "nickname": "Pro (Annual)",
+    "amount": 89100,
+    "interval": "year"
+  },
+  {
+    "id": "price_1ReoAgPxyP7CYtDYGiRxafz7",
+    "nickname": "Pro (Monthly)",
+    "amount": 9900,
+    "interval": "month"
+  },
+  {
+    "id": "price_1ReoAgPxyP7CYtDYOKwwDMG0",
+    "nickname": "Starter (Annual)",
+    "amount": 27840,
+    "interval": "year"
+  },
+  {
+    "id": "price_1ReoAfPxyP7CYtDY4BQvmaHy",
+    "nickname": "Starter (Monthly)",
+    "amount": 2900,
+    "interval": "month"
+  },
+  {
+    "id": "price_1RenkzPxyP7CYtDYhSULkbE9",
+    "nickname": null,
+    "amount": 1500,
+    "interval": "month"
+  },
+  {
+    "id": "price_1ReMJ5PxyP7CYtDYhMZKbRW1",
+    "nickname": "Enterprise",
+    "amount": 10000,
+    "interval": "month"
+  }
+]
