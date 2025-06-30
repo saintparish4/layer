@@ -57,65 +57,63 @@ async function createOrUpdateProduct(plan: PlanConfig): Promise<Stripe.Product> 
 }
 
 async function createOrUpdatePrices(product: Stripe.Product, plan: PlanConfig): Promise<void> {
-    // Create monthly price
-    if (plan.amount > 0) {
-        const monthlyLookupKey = `${plan.nickname}_monthly`;
-        const monthlyPrices = await stripe.prices.list({
+    // Create monthly price (including for free plans)
+    const monthlyLookupKey = `${plan.nickname}_monthly`;
+    const monthlyPrices = await stripe.prices.list({
+        product: product.id,
+        lookup_keys: [monthlyLookupKey],
+        active: true,
+    });
+
+    if (monthlyPrices.data.length === 0) {
+        const monthlyPrice = await stripe.prices.create({
+            unit_amount: plan.amount,
+            currency: "usd",
+            recurring: { interval: "month" },
             product: product.id,
-            lookup_keys: [monthlyLookupKey],
+            nickname: plan.amount === 0 ? plan.nickname : `${plan.nickname} (Monthly)`,
+            lookup_key: monthlyLookupKey,
+            metadata: {
+                trialDays: plan.trialDays?.toString() || "0",
+                planType: plan.metadata?.planType || (plan.amount === 0 ? "free" : "paid")
+            }
+        });
+        console.log(`✅ Created monthly price ${monthlyPrice.id} for ${plan.nickname} (${plan.amount === 0 ? 'Free' : `$${(plan.amount / 100).toFixed(2)}/month`})`);
+    } else {
+        console.log(`ℹ️  Monthly price exists for ${plan.nickname}: ${monthlyPrices.data[0].id}`);
+    }
+
+    // Create annual price with discount (only for paid plans)
+    if (plan.amount > 0 && plan.annualDiscount) {
+        const annualAmount = Math.round(plan.amount * 12 * (1 - plan.annualDiscount / 100));
+        const annualLookupKey = `${plan.nickname}_annual`;
+        const annualPrices = await stripe.prices.list({
+            product: product.id,
+            lookup_keys: [annualLookupKey],
             active: true,
         });
 
-        if (monthlyPrices.data.length === 0) {
-            const monthlyPrice = await stripe.prices.create({
-                unit_amount: plan.amount,
+        if (annualPrices.data.length === 0) {
+            const annualPrice = await stripe.prices.create({
+                unit_amount: annualAmount,
                 currency: "usd",
-                recurring: { interval: "month" },
+                recurring: { interval: "year" },
                 product: product.id,
-                nickname: `${plan.nickname} (Monthly)`,
-                lookup_key: monthlyLookupKey,
+                nickname: `${plan.nickname} (Annual)`,
+                lookup_key: annualLookupKey,
                 metadata: {
                     trialDays: plan.trialDays?.toString() || "0",
+                    originalMonthlyPrice: plan.amount.toString(),
+                    discountPercentage: plan.annualDiscount.toString(),
                     planType: plan.metadata?.planType || "paid"
                 }
             });
-            console.log(`✅ Created monthly price ${monthlyPrice.id} for ${plan.nickname} ($${(plan.amount / 100).toFixed(2)}/month)`);
+            console.log(`✅ Created annual price ${annualPrice.id} for ${plan.nickname} ($${(annualAmount / 100).toFixed(2)}/year, ${plan.annualDiscount}% off)`);
         } else {
-            console.log(`ℹ️  Monthly price exists for ${plan.nickname}: ${monthlyPrices.data[0].id}`);
+            console.log(`ℹ️  Annual price exists for ${plan.nickname}: ${annualPrices.data[0].id}`);
         }
-
-        // Create annual price with discount
-        if (plan.annualDiscount) {
-            const annualAmount = Math.round(plan.amount * 12 * (1 - plan.annualDiscount / 100));
-            const annualLookupKey = `${plan.nickname}_annual`;
-            const annualPrices = await stripe.prices.list({
-                product: product.id,
-                lookup_keys: [annualLookupKey],
-                active: true,
-            });
-
-            if (annualPrices.data.length === 0) {
-                const annualPrice = await stripe.prices.create({
-                    unit_amount: annualAmount,
-                    currency: "usd",
-                    recurring: { interval: "year" },
-                    product: product.id,
-                    nickname: `${plan.nickname} (Annual)`,
-                    lookup_key: annualLookupKey,
-                    metadata: {
-                        trialDays: plan.trialDays?.toString() || "0",
-                        originalMonthlyPrice: plan.amount.toString(),
-                        discountPercentage: plan.annualDiscount.toString(),
-                        planType: plan.metadata?.planType || "paid"
-                    }
-                });
-                console.log(`✅ Created annual price ${annualPrice.id} for ${plan.nickname} ($${(annualAmount / 100).toFixed(2)}/year, ${plan.annualDiscount}% off)`);
-            } else {
-                console.log(`ℹ️  Annual price exists for ${plan.nickname}: ${annualPrices.data[0].id}`);
-            }
-        }
-    } else {
-        console.log(`⏭️  Skipping price creation for ${plan.nickname} (free plan)`);
+    } else if (plan.amount === 0) {
+        console.log(`⏭️  Skipping annual price for ${plan.nickname} (free plan)`);
     }
 }
 

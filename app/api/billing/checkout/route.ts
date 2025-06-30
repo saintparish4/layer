@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Stripe is not configured" }, { status: 500 });
         }
 
-        const { lookupKey } = await req.json();
+        const { lookupKey, tenantId } = await req.json();
         
         if (!lookupKey) {
             return NextResponse.json({ error: "lookupKey is required" }, { status: 400 });
@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
         const session = await stripe.checkout.sessions.create({
             mode: "subscription",
             line_items: [{ price: price.id, quantity: 1 }],
+            metadata: { tenantId },
             success_url: `${process.env.NEXTAUTH_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXTAUTH_URL}/pricing`, 
         });

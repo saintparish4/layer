@@ -18,7 +18,11 @@ type StripePrice = {
     lookup_key: string;
 };
 
-export default function PricingTable() {
+interface PricingTableProps {
+    onSelect?: (planNickname: string) => void;
+}
+
+export default function PricingTable({ onSelect }: PricingTableProps) {
     const [plans, setPlans] = useState<Plan[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -42,6 +46,7 @@ export default function PricingTable() {
                     return false;
                 }
                 
+                // Include Hobby (free) plan and monthly plans
                 return p.nickname.includes('(Monthly)') || 
                        (p.nickname === 'Hobby' && p.unit_amount === 0);
             });
@@ -64,13 +69,17 @@ export default function PricingTable() {
     }, []); 
 
     const subscribe = async (planNickname: string) => {
+        // Call onSelect prop if provided
+        if (onSelect) {
+            onSelect(planNickname);
+        }
+
+        // For Hobby plan, just call onSelect and return (no checkout needed)
+        if (planNickname === 'Hobby') {
+            return;
+        }
+
         try {
-            // Skip subscription for Hobby plan
-            if (planNickname === 'Hobby') {
-                alert('Hobby plan is free and requires no subscription.');
-                return;
-            }
-            
             // Use the monthly lookup key format that matches our seed script
             const lookupKey = `${planNickname}_monthly`;
             
@@ -128,14 +137,13 @@ export default function PricingTable() {
                     </p>
                     <button 
                         onClick={() => subscribe(plan.nickname)}
-                        disabled={plan.nickname === 'Hobby'}
                         className={`mt-4 w-full py-2 rounded-md transition-colors ${
                             plan.nickname === 'Hobby'
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                ? 'bg-green-600 text-white hover:bg-green-700'
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                         }`}
                     >
-                        {plan.nickname === 'Hobby' ? 'Current Plan' : 'Subscribe'}
+                        {plan.nickname === 'Hobby' ? 'Select Free Plan' : 'Subscribe'}
                     </button>
                 </div>
             ))}

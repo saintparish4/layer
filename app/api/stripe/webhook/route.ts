@@ -20,11 +20,23 @@ export async function POST(req:  NextRequest) {
         case "customer.subscription.created":
         case "customer.subscription.updated":
         case "customer.subscription.deleted":
-            console.log(`Subscription event: ${event.type}`, event.data.object);
-            // TODO: Persist subscription status to your DB
+            console.log(`Subscription event: ${event.type}`, {
+                subscriptionId: (event.data.object as Stripe.Subscription).id,
+                customerId: (event.data.object as Stripe.Subscription).customer,
+                status: (event.data.object as Stripe.Subscription).status,
+                tenantId: (event.data.object as Stripe.Subscription).metadata?.tenantId
+            });
+            // Backend handles the database updates
             break;
-            default:
-                console.log(`Unhandled event type ${event.type}`);
+        case "checkout.session.completed":
+            console.log(`Checkout completed:`, {
+                sessionId: (event.data.object as Stripe.Checkout.Session).id,
+                customerId: (event.data.object as Stripe.Checkout.Session).customer,
+                tenantId: (event.data.object as Stripe.Checkout.Session).metadata?.tenantId
+            });
+            break;
+        default:
+            console.log(`Unhandled event type ${event.type}`);
     }
     return NextResponse.json({ received: true });
 }

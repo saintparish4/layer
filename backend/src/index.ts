@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { tenantRouter } from "./routes/tenant";
+import { stripeRouter } from "./routes/stripe";
 dotenv.config();
 
 const app = express();
@@ -10,6 +11,8 @@ app.use(express.json());
 
 // Tenant APIs
 app.use("/api/tenants", tenantRouter);
+app.use("/api/stripe", stripeRouter);
+app.get('/hello-world', (_req, res) => res.json({ message: 'OK' }));
 
 // Health Check
 app.get("/hello-world", (req, res) => {

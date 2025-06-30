@@ -1,12 +1,19 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../app/generated/prisma"
-  
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum SubscriptionTier {
+  HOBBY
+  STARTER
+  PRO
+  BUSINESS
+  ENTERPRISE
 }
 
 model User {
@@ -36,7 +43,7 @@ model Session {
   createdAt DateTime
   updatedAt DateTime
   // Relations
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
@@ -78,14 +85,24 @@ model Verification {
 }
 
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  ownerId   String // BetterAuth User ID
-  createdAt DateTime
-  updatedAt DateTime
+  id               String           @id @default(cuid())
+  name             String
+  ownerId          String // BetterAuth User ID
+  createdAt        DateTime
+  updatedAt        DateTime
+  subscriptionTier SubscriptionTier? @default(HOBBY)
+  // Subscription fields
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  subscriptionStatus String? @default("inactive") // active, canceled, trialing, etc.
+  subscriptionPeriodStart DateTime?
+  subscriptionPeriodEnd DateTime?
+  subscriptionCancelAtPeriodEnd Boolean @default(false)
   // Relations
-  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner            User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
   @@map("tenant")
 }

@@ -8,6 +8,7 @@ interface Tenant {
     id: string;
     name: string;
     ownerId: string;
+    stripeCustomerId?: string;
 }
 
 export default function Dashboard() {
@@ -65,10 +66,15 @@ export default function Dashboard() {
 
     const openPortal = async () => {
         try {
+            if (!tenant?.stripeCustomerId) {
+                alert('No billing information found. Please contact support.');
+                return;
+            }
+
             const res = await fetch('/api/billing/portal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({}), 
+                body: JSON.stringify({ customerId: tenant.stripeCustomerId }), 
             });
             
             if (!res.ok) {
